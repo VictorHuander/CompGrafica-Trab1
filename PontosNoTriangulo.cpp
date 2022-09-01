@@ -57,6 +57,7 @@ bool FoiClicado = false;
 
 
 Poligono envelope;
+Poligono pontosDentroDoEnvelope;
 Ponto p1, p2, p3, p4;
 
 // **********************************************************************
@@ -240,13 +241,37 @@ void DesenhaLinha(Ponto P1, Ponto P2)
 // **********************************************************************
 //  void display( void )
 //
+bool estaDentroDoEnvelope(Ponto ponto) {
+    // p1 p2
+    // p3 p4
+    if ((ponto.x <= p2.x && ponto.x >= p1.x ) && (ponto.y <= p1.y && ponto.y >= p3.y )) {
+        return true;
+    }
+        return false;
+}
+void DesenhaVerticesColoridos (Poligono Poly)
+{
+    for (int i=0; i<Poly.getNVertices(); i++)
+    {
+        Ponto P;
+        P = Poly.getVertice(i); // obtem a coordenada
+        glBegin(GL_POINTS);
+//            if (P.x> P.y == 0) // critério para escolher a cor
+                defineCor(NeonPink);
+//            else defineCor(GreenYellow);
+            glVertex3f(P.x,P.y,P.z);
+        glEnd();
+    }
+}
 void geradorDeEnvelope() {
-    unsigned long numeroDePontos = PontosDoCenario.getNVertices();
+
+    glLineWidth(4);
+    glColor3f(0.2,0.5,0.7);
     Poligono envelope = Poligono();
     Ponto min, max;
     CampoDeVisao.obtemLimites(min, max);
     // p1 p2
-    // p2 p3
+    // p3 p4
     p1 = Ponto(min.x, max.y);
     p2 = Ponto(max.x, max.y);
     p3 = Ponto(max.x, min.y);
@@ -256,6 +281,23 @@ void geradorDeEnvelope() {
     envelope.insereVertice(p3);
     envelope.insereVertice(p4);
     envelope.desenhaPoligono();
+
+    unsigned long numeroDePontos = PontosDoCenario.getNVertices();
+    pontosDentroDoEnvelope = Poligono(); // talvez ocorra um memory leak aqui pois não estou excluindo os ontos antigos
+
+    glPointSize(4);
+    for(int n = 0; n <= numeroDePontos; n++){
+        Ponto pontoAtual = PontosDoCenario.getVertice(n);
+        if (estaDentroDoEnvelope(pontoAtual)) {
+            glBegin(GL_POINTS);
+                    defineCor(NeonPink);
+                glVertex3f(pontoAtual.x,pontoAtual.y,pontoAtual.z);
+            glEnd();
+
+            //pontosDentroDoEnvelope.insereVertice(pontoAtual);
+        }
+    }
+    glPointSize(1);
 }
 
 // **********************************************************************
@@ -281,10 +323,7 @@ void display( void )
     }
     if (desenhaEnvelope)
     {
-        glLineWidth(2);
-        glColor3f(0.2,0.5,0.7);
         geradorDeEnvelope();
-
     }
 
     //glPointSize(5);
@@ -348,7 +387,6 @@ void desenhaEnvelopeOnOff() {
     } else {
         desenhaEnvelope = true;
     }
-    cout << desenhaEnvelope <<endl;
 }
 
 void keyboard ( unsigned char key, int x, int y )
