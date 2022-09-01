@@ -263,6 +263,12 @@ void DesenhaVerticesColoridos (Poligono Poly)
         glEnd();
     }
 }
+// nos ultimos sldies de fundamentos matematicos está a explicação matematica da forca bruta e nas mensagens do email do moolde esta um codigo quase implementado
+Poligono forcaBruta(Poligono pontosPoligono, Poligono poligonoConvexo) {
+
+    return Poligono();
+}
+
 void geradorDeEnvelope() {
 
     glLineWidth(4);
