@@ -38,7 +38,7 @@ using namespace std;
 
 #include "Ponto.h"
 #include "Poligono.h"
-
+#include "ListaDeCoresRGB.h""
 #include "Temporizador.h"
 Temporizador T;
 double AccumDeltaT=0;
@@ -52,6 +52,7 @@ Ponto Min, Max, Tamanho, Meio;
 Ponto PosicaoDoCampoDeVisao, PontoClicado;
 
 bool desenhaEixos = true;
+bool desenhaEnvelope = false;
 bool FoiClicado = false;
 
 
@@ -165,11 +166,6 @@ void init()
     CriaTrianguloDoCampoDeVisao();
     PosicionaTrianguloDoCampoDeVisao();
 
-    envelope.insereVertice(p1);
-    envelope.insereVertice(p2);
-    envelope.insereVertice(p3);
-    envelope.insereVertice(p4);
-
 }
 
 double nFrames=0;
@@ -244,20 +240,38 @@ void DesenhaLinha(Ponto P1, Ponto P2)
 // **********************************************************************
 //  void display( void )
 //
+void geradorDeEnvelope() {
+    unsigned long numeroDePontos = PontosDoCenario.getNVertices();
+    Poligono envelope = Poligono();
+    Ponto min, max;
+    CampoDeVisao.obtemLimites(min, max);
+    // p1 p2
+    // p2 p3
+    p1 = Ponto(min.x, max.y);
+    p2 = Ponto(max.x, max.y);
+    p3 = Ponto(max.x, min.y);
+    p4 = Ponto(min.x, min.y);
+    envelope.insereVertice(p1);
+    envelope.insereVertice(p2);
+    envelope.insereVertice(p3);
+    envelope.insereVertice(p4);
+    envelope.desenhaPoligono();
+}
+
 // **********************************************************************
 void display( void )
 {
 
-	// Limpa a tela coma cor de fundo
-	glClear(GL_COLOR_BUFFER_BIT);
+    // Limpa a tela coma cor de fundo
+    glClear(GL_COLOR_BUFFER_BIT);
 
     // Define os limites lógicos da área OpenGL dentro da Janela
-	glMatrixMode(GL_MODELVIEW);
+    glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-	// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-	// Coloque aqui as chamadas das rotinas que desenham os objetos
-	// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    // Coloque aqui as chamadas das rotinas que desenham os objetos
+    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     if (desenhaEixos)
     {
@@ -265,22 +279,29 @@ void display( void )
         glColor3f(1,1,1); // R, G, B  [0..1]
         DesenhaEixos();
     }
+    if (desenhaEnvelope)
+    {
+        glLineWidth(2);
+        glColor3f(0.2,0.5,0.7);
+        geradorDeEnvelope();
+
+    }
 
     //glPointSize(5);
     glColor3f(1,1,0); // R, G, B  [0..1]
     PontosDoCenario.desenhaVertices();
-    
+
     glLineWidth(3);
     glColor3f(1,0,0); // R, G, B  [0..1]
     CampoDeVisao.desenhaPoligono();
-    
+
     if (FoiClicado)
     {
         //PontoClicado.imprime("- Ponto no universo: ", "\n");
         FoiClicado = false;
     }
-    
-	glutSwapBuffers();
+
+    glutSwapBuffers();
 }
 // **********************************************************************
 // ContaTempo(double tempo)
@@ -321,6 +342,14 @@ void minMaxPrint(){
     minimo.imprime();
     cout << " "<<endl;
 }
+void desenhaEnvelopeOnOff() {
+    if (desenhaEnvelope == true) {
+        desenhaEnvelope = false;
+    } else {
+        desenhaEnvelope = true;
+    }
+    cout << desenhaEnvelope <<endl;
+}
 
 void keyboard ( unsigned char key, int x, int y )
 {
@@ -347,6 +376,9 @@ void keyboard ( unsigned char key, int x, int y )
             break;
         case 'd':
             campoDeVisaoConstante -= 0.01;
+            break;
+        case 'e':
+            desenhaEnvelopeOnOff();
             break;
 		default:
 			break;
